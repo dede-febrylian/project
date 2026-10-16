@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Storage;
 use App\Models\RuangModel;
 use App\Models\FasilitasModel;
 use App\Models\ReservasiModel;
@@ -62,22 +62,30 @@ class RuangController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Simpan Data Ruangan
+        // Handle upload gambar
+        $gambarPath = null;
+        if ($request->hasFile('gambar')) {
+            $gambarPath = $request->file('gambar')->store('ruang', 'public');
+        }
+
+        // Simpan ruangan
         $ruang = RuangModel::create([
             'nama_ruang'         => $request->nama_ruang,
             'kapasitas_maksimal' => $request->kapasitas_maksimal,
             'deskripsi'          => $request->deskripsi,
+            'gambar'             => $gambarPath,   // ← simpan path
             'status_ruang'       => $request->status_ruang ?? 'tersedia',
         ]);
 
-        // 2. Simpan Data Fasilitas Kursi Terkait
+        // Simpan fasilitas kursi
         FasilitasModel::create([
             'id_ruang'     => $ruang->id_ruang,
             'jumlah_kursi' => $request->jumlah_kursi,
             'keterangan'   => $request->keterangan_kursi,
         ]);
 
-        return redirect()->back()->with('success', 'Ruangan berhasil ditambahkan!');
+        return redirect()->route('admin.ruang.index')
+            ->with('success', 'Ruangan berhasil ditambahkan!');
     }
 
     /**
@@ -104,27 +112,40 @@ class RuangController extends Controller
      * Memperbarui data ruangan dan fasilitas kursinya.
      */
     public function update(Request $request, string $id)
-    {
-        $ruang = RuangModel::findOrFail($id);
+{
+    $ruang = RuangModel::findOrFail($id);
 
-        // Update data ruangan
-        $ruang->update([
-            'nama_ruang'         => $request->nama_ruang,
-            'kapasitas_maksimal' => $request->kapasitas_maksimal,
-            'deskripsi'          => $request->deskripsi,
-            'status_ruang'       => $request->status_ruang,
-        ]);
-
-        // Update data fasilitas kursi jika ada
-        if ($ruang->fasilitas) {
-            $ruang->fasilitas->update([
-                'jumlah_kursi' => $request->jumlah_kursi,
-                'keterangan'   => $request->keterangan_kursi,
-            ]);
+    // Handle upload gambar baru
+    $gambarPath = $ruang->gambar; // default: gambar lama
+    if ($request->hasFile('gambar')) {
+        // Hapus gambar lama
+        if ($ruang->gambar && Storage::disk('public')->exists($ruang->gambar)) {
+            Storage::disk('public')->delete($ruang->gambar);
         }
-
-        return redirect()->back()->with('success', 'Data ruangan berhasil diperbarui!');
+        // Simpan gambar baru
+        $gambarPath = $request->file('gambar')->store('ruang', 'public');
     }
+
+    // Update ruangan
+    $ruang->update([
+        'nama_ruang'         => $request->nama_ruang,
+        'kapasitas_maksimal' => $request->kapasitas_maksimal,
+        'deskripsi'          => $request->deskripsi,
+        'gambar'             => $gambarPath,
+        'status_ruang'       => $request->status_ruang,
+    ]);
+
+    // Update fasilitas kursi
+    if ($ruang->fasilitas) {
+        $ruang->fasilitas->update([
+            'jumlah_kursi' => $request->jumlah_kursi,
+            'keterangan'   => $request->keterangan_kursi,
+        ]);
+    }
+
+    return redirect()->route('admin.ruang.index')
+        ->with('success', 'Data ruangan berhasil diperbarui!');
+}
 
     /**
      * Remove the specified resource from storage.

@@ -16,6 +16,7 @@ class RuangModel extends Model
         'nama_ruang',
         'kapasitas_maksimal',
         'deskripsi',
+        'gambar',
         'status_ruang',
     ];
 

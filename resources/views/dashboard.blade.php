@@ -30,96 +30,95 @@
                     @php
                         $statusConfig = match($ruang->status_realtime) {
                             'tersedia' => [
-                                'color' => 'green',
                                 'label' => 'Tersedia',
-                                'bg'    => 'bg-green-50',
-                                'text'  => 'text-green-700',
                                 'badge' => 'bg-green-100 text-green-800',
                                 'dot'   => 'bg-green-500',
                             ],
                             'digunakan' => [
-                                'color' => 'yellow',
                                 'label' => 'Sedang Digunakan',
-                                'bg'    => 'bg-yellow-50',
-                                'text'  => 'text-yellow-700',
                                 'badge' => 'bg-yellow-100 text-yellow-800',
                                 'dot'   => 'bg-yellow-500',
                             ],
                             'maintenance' => [
-                                'color' => 'red',
                                 'label' => 'Maintenance',
-                                'bg'    => 'bg-red-50',
-                                'text'  => 'text-red-700',
                                 'badge' => 'bg-red-100 text-red-800',
                                 'dot'   => 'bg-red-500',
                             ],
                             default => [
-                                'color' => 'gray',
                                 'label' => 'Unknown',
-                                'bg'    => 'bg-gray-50',
-                                'text'  => 'text-gray-700',
                                 'badge' => 'bg-gray-100 text-gray-800',
                                 'dot'   => 'bg-gray-500',
                             ],
                         };
                     @endphp
 
-                    <div class="bg-white rounded-xl shadow hover:shadow-lg transition-shadow overflow-hidden">
+                    <div class="bg-white rounded-xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
 
-                        {{-- Header Card --}}
-                        <div class="p-5 border-b border-gray-100">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0 flex-1">
-                                    <h3 class="text-lg font-bold text-gray-800 truncate">
-                                        {{ $ruang->nama_ruang }}
-                                    </h3>
-                                    @if($ruang->deskripsi)
-                                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">
-                                            {{ Str::limit($ruang->deskripsi, 80) }}
-                                        </p>
-                                    @endif
+                        <div class="relative h-44 overflow-hidden bg-gray-100">
+                            @if($ruang->gambar)
+                                <img src="{{ asset('storage/' . $ruang->gambar) }}" 
+                                     alt="{{ $ruang->nama_ruang }}"
+                                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                            @else
+                                {{-- Placeholder kalau tidak ada gambar --}}
+                                <div class="w-full h-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center">
+                                    <svg class="w-16 h-16 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                    </svg>
                                 </div>
+                            @endif
 
-                                {{-- Status Badge --}}
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 {{ $statusConfig['badge'] }}">
+                            {{-- Status Badge Overlay --}}
+                            <div class="absolute top-3 right-3">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow {{ $statusConfig['badge'] }}">
                                     <span class="w-2 h-2 rounded-full {{ $statusConfig['dot'] }} animate-pulse"></span>
                                     {{ $statusConfig['label'] }}
                                 </span>
                             </div>
                         </div>
 
-                        {{-- Info --}}
-                        <div class="p-5 space-y-3">
-                            {{-- Kapasitas --}}
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                          d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"/>
-                                </svg>
-                                <span>Kapasitas: <strong>{{ $ruang->kapasitas_maksimal }}</strong> orang</span>
-                            </div>
+                        <div class="p-5 flex-1">
+                            <h3 class="text-lg font-bold text-gray-800 truncate">
+                                {{ $ruang->nama_ruang }}
+                            </h3>
+                            
+                            @if($ruang->deskripsi)
+                                <p class="text-xs text-gray-500 mt-1 line-clamp-2">
+                                    {{ Str::limit($ruang->deskripsi, 80) }}
+                                </p>
+                            @endif
 
-                            {{-- Fasilitas Kursi --}}
-                            @if($ruang->fasilitas)
+                            <div class="mt-3 space-y-2">
+                                {{-- Kapasitas --}}
                                 <div class="flex items-center gap-2 text-sm text-gray-600">
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                              d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                              d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"/>
                                     </svg>
-                                    <span>Kursi: <strong>{{ $ruang->fasilitas->jumlah_kursi }}</strong>
-                                        @if($ruang->fasilitas->keterangan)
-                                            <span class="text-gray-400">({{ $ruang->fasilitas->keterangan }})</span>
-                                        @endif
-                                    </span>
+                                    <span>Kapasitas: <strong>{{ $ruang->kapasitas_maksimal }}</strong> orang</span>
                                 </div>
-                            @endif
-                        </div>
 
-                        {{-- Action --}}
+                                {{-- Fasilitas Kursi --}}
+                                @if($ruang->fasilitas)
+                                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                  d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                        </svg>
+                                        <span>Kursi: <strong>{{ $ruang->fasilitas->jumlah_kursi }}</strong>
+                                            @if($ruang->fasilitas->keterangan)
+                                                <span class="text-gray-400">({{ $ruang->fasilitas->keterangan }})</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        {{-- ============================================ --}}
+                        {{-- ACTION                                       --}}
+                        {{-- ============================================ --}}
                         <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                            <span class="text-xs text-gray-500">
-                                ID: #{{ $ruang->id_ruang }}
-                            </span>
                             @auth
                                 <a href="{{ route('reservasi.create') }}" 
                                    class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800">

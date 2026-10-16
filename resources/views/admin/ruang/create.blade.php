@@ -11,23 +11,23 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
 
             @if(session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
-                    {{ session('success') }}
-                </div>
+            <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+                {{ session('success') }}
+            </div>
             @endif
 
             @if($errors->any())
-                <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-                    <p class="font-semibold mb-1">Terjadi kesalahan:</p>
-                    <ul class="list-disc list-inside text-sm">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+            <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+                <p class="font-semibold mb-1">Terjadi kesalahan:</p>
+                <ul class="list-disc list-inside text-sm">
+                    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
             @endif
 
-            <form action="{{ route('admin.ruang.store') }}" method="POST">
+            <form action="{{ route('admin.ruang.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="bg-white rounded-lg shadow p-6 mb-6">
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
@@ -38,44 +38,68 @@
 
                         <div>
                             <label for="nama_ruang" class="block text-sm font-medium text-gray-700">
-                                Nama Ruangan 
+                                Nama Ruangan
                             </label>
-                            <input 
-                                type="text" 
-                                id="nama_ruang" 
-                                name="nama_ruang" 
+                            <input
+                                type="text"
+                                id="nama_ruang"
+                                name="nama_ruang"
                                 value="{{ old('nama_ruang') }}"
                                 required
                                 placeholder="Contoh: Ruang Meeting A"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             @error('nama_ruang')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         {{-- Kapasitas --}}
                         <div>
                             <label for="kapasitas_maksimal" class="block text-sm font-medium text-gray-700">
-                                Kapasitas Maksimal 
+                                Kapasitas Maksimal
                             </label>
                             <div class="relative mt-1">
-                                <input 
-                                    type="number" 
-                                    id="kapasitas_maksimal" 
-                                    name="kapasitas_maksimal" 
+                                <input
+                                    type="number"
+                                    id="kapasitas_maksimal"
+                                    name="kapasitas_maksimal"
                                     value="{{ old('kapasitas_maksimal') }}"
                                     min="1"
                                     required
                                     placeholder="Contoh: 20"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-16"
-                                >
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-16">
                                 <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500">
                                     orang
                                 </span>
                             </div>
                             @error('kapasitas_maksimal')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Gambar Ruangan --}}
+                        <div>
+                            <label for="gambar" class="block text-sm font-medium text-gray-700">
+                                Gambar Ruangan
+                            </label>
+                            <div class="mt-1 flex items-center gap-4">
+                                <input
+                                    type="file"
+                                    id="gambar"
+                                    name="gambar"
+                                    accept="image/*"
+                                    onchange="previewImage(event, 'preview-create')"
+                                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Format: JPG, PNG, WEBP. Maks 2MB.</p>
+
+                            {{-- Preview --}}
+                            <div id="preview-create" class="mt-3 hidden">
+                                <img src="" alt="Preview" class="w-40 h-40 object-cover rounded-lg border border-gray-200">
+                            </div>
+
+                            @error('gambar')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -84,34 +108,32 @@
                             <label for="deskripsi" class="block text-sm font-medium text-gray-700">
                                 Deskripsi
                             </label>
-                            <textarea 
-                                id="deskripsi" 
-                                name="deskripsi" 
+                            <textarea
+                                id="deskripsi"
+                                name="deskripsi"
                                 rows="3"
                                 placeholder="Contoh: Ruangan ber-AC dengan proyektor dan whiteboard"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >{{ old('deskripsi') }}</textarea>
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('deskripsi') }}</textarea>
                             @error('deskripsi')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         {{-- Status --}}
                         <div>
                             <label for="status_ruang" class="block text-sm font-medium text-gray-700">
-                                Status Ruangan 
+                                Status Ruangan
                             </label>
-                            <select 
-                                id="status_ruang" 
-                                name="status_ruang" 
+                            <select
+                                id="status_ruang"
+                                name="status_ruang"
                                 required
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                                <option value="tersedia"    {{ old('status_ruang') == 'tersedia'    ? 'selected' : '' }}>Tersedia</option>
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="tersedia" {{ old('status_ruang') == 'tersedia'    ? 'selected' : '' }}>Tersedia</option>
                                 <option value="maintenance" {{ old('status_ruang') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
                             </select>
                             @error('status_ruang')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -131,25 +153,24 @@
                         {{-- Jumlah Kursi --}}
                         <div>
                             <label for="jumlah_kursi" class="block text-sm font-medium text-gray-700">
-                                Jumlah Kursi 
+                                Jumlah Kursi
                             </label>
                             <div class="relative mt-1">
-                                <input 
-                                    type="number" 
-                                    id="jumlah_kursi" 
-                                    name="jumlah_kursi" 
+                                <input
+                                    type="number"
+                                    id="jumlah_kursi"
+                                    name="jumlah_kursi"
                                     value="{{ old('jumlah_kursi') }}"
                                     min="0"
                                     required
                                     placeholder="Contoh: 20"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-16"
-                                >
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-16">
                                 <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500">
                                     kursi
                                 </span>
                             </div>
                             @error('jumlah_kursi')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -158,30 +179,29 @@
                             <label for="keterangan_kursi" class="block text-sm font-medium text-gray-700">
                                 Keterangan Kursi
                             </label>
-                            <input 
-                                type="text" 
-                                id="keterangan_kursi" 
-                                name="keterangan_kursi" 
+                            <input
+                                type="text"
+                                id="keterangan_kursi"
+                                name="keterangan_kursi"
                                 value="{{ old('keterangan_kursi') }}"
                                 placeholder="Contoh: Kursi lipat, kursi putar, dll"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             @error('keterangan_kursi')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                     </div>
                 </div>
                 <div class="flex items-center justify-end gap-3">
-                    <a href="{{ route('admin.ruang.index') }}" 
-                       class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition">
+                    <a href="{{ route('admin.ruang.index') }}"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition">
                         Batal
                     </a>
-                    <button type="submit" 
-                            class="inline-flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                         Simpan Ruangan
                     </button>
@@ -190,4 +210,19 @@
             </form>
         </div>
     </div>
+    <script>
+        function previewImage(event, previewId) {
+            const preview = document.getElementById(previewId);
+            const file = event.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.querySelector('img').src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 </x-app-layout>
